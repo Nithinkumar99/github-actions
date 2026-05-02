@@ -56,6 +56,6 @@ jobs:
         with:
           name: build-artifacts
       - name: output build artifacts
-        run: ls -la dist/
+        run: ls -la 
       - name: Deploy to production
         run: echo "Deploying to production..."
