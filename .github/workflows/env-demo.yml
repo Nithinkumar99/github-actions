@@ -1,0 +1,48 @@
+name: Env demo Project
+on: 
+  push:
+    branches: 
+    - master
+  pull_request:
+    branches: 
+    - master
+
+env:
+  MONGODB_DB_NAME: github-actions-demo
+  MONGODB_CLUSTER_ADDRESS: cluster0.6sktznf.mongodb.net
+  MONGODB_USERNAME: nithinkumar
+  MONGODB_PASSWORD: cz74B20ClQPDmD99
+
+jobs:
+  test:
+    env:
+        PORT: 3000
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: cache node modules
+        uses: actions/cache@v3
+        with: 
+             path: ~/.npm
+             key: node-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Install dependencies
+        run: npm ci
+      - name: start server
+        run: npm start & npx wait-on http://localhost:$PORT
+      - name: Run linter
+        run: npm run lint
+      - name: Run tests
+        run: npm test
+      - name: Output environment variables
+        run: |
+          echo "MONGODB_DB_NAME: ${{ env.MONGODB_DB_NAME }}"
+          echo "MONGODB_CLUSTER_ADDRESS: ${{ env.MONGODB_CLUSTER_ADDRESS }}"
+          echo "MONGODB_USERNAME: ${{ env.MONGODB_USERNAME }}"
+          echo "MONGODB_PASSWORD: ${{ env.MONGODB_PASSWORD }}"
+  Deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Deploy to production
+        run: echo "Deploying to production..."
