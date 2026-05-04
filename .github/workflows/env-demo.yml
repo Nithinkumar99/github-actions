@@ -15,8 +15,11 @@ env:
 
 jobs:
   test:
+    environment:
+      name: testing
     env:
         PORT: 3000
+        MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
