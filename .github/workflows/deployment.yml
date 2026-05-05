@@ -69,6 +69,8 @@ jobs:
   Deploy:
     needs: Build 
     uses: ./.github/workflows/reusable.yml # Call the reusable workflow defined in .github/workflows/reusable.yml
+    with:
+       artifact-file: test-reports # Provide the required input for the reusable workflow
   
   Report:
     needs: [lint, Deploy]
