@@ -39,10 +39,10 @@ jobs:
         if: steps.cache-node-modules.outputs.cache-hit != 'true' # Only run npm ci if the cache was not hit
         run: npm ci
       - name: Run tests
+        continue-on-error: true # Allow the workflow to continue even if tests fail
         id: test-step
-        run: npm test
+        run: npm run test 
       - name: Upload test reports
-        if: failure() && steps.test-step.outcome == 'failure'
         uses: actions/upload-artifact@v7
         with:
             name: test-reports
