@@ -6,8 +6,15 @@ jobs:
         strategy:
             matrix:
                 node-version: [14, 16, 18]
-                operating-system: [ubuntu-latest, windows-latest, macos-latest]
+                operating-system: [ubuntu-latest, windows-latest]
+                include: # include specific combinations from the matrix
+                    - node-version: 18
+                      operating-system: ubuntu-latest
+                exclude: # exclude specific combinations from the matrix
+                    - node-version: 14
+                      operating-system: windows-latest
         runs-on: ${{ matrix.operating-system }}
+        continue-on-error: true # Allow the workflow to continue even if this job fails
 
         steps:
             - name: Checkout code
