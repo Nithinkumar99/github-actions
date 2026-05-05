@@ -75,6 +75,7 @@ jobs:
   
   Report:
     needs: [lint, Deploy]
+    if: failure() # Only run this job if either lint or Deploy fails
     runs-on: ubuntu-latest
     steps:
       - name: Generate report
