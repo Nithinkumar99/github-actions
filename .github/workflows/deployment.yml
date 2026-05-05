@@ -81,4 +81,4 @@ jobs:
       - name: Generate report
         run: |
           echo "Generating report..."
-          echo " {{ toJSON(github) }}"
+          echo " ${{ toJSON(github) }}"
