@@ -8,6 +8,13 @@ on:
     - master
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: run linter
+        run: npm run lint
   test:
     runs-on: ubuntu-latest
     steps:
@@ -20,8 +27,6 @@ jobs:
              key: node-modules-${{ hashFiles('**/package-lock.json') }}
       - name: Install dependencies
         run: npm ci
-      - name: Run linter
-        run: npm run lint
       - name: Run tests
         id: test-step
         run: npm test
@@ -60,3 +65,12 @@ jobs:
         run: ls -la 
       - name: Deploy to production
         run: echo "Deploying to production..."
+  
+  Report:
+    needs: [lint, Deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate report
+        run: |
+          echo "Generating report..."
+          echo " {{ toJSON(github) }}"
