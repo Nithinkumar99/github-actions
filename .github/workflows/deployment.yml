@@ -23,7 +23,14 @@ jobs:
       - name: Run linter
         run: npm run lint
       - name: Run tests
+        id: test-step
         run: npm test
+      - name: Upload test reports
+        if: failure() && steps.test-step.outcome == 'failure'
+        uses: actions/upload-artifact@v3
+        with:
+            name: test-reports
+            path: test.json
   Build:
     needs: test
     runs-on: ubuntu-latest
@@ -39,11 +46,7 @@ jobs:
         run: npm ci
       - name: Build project
         run: npm run build
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: build-artifacts
-          path: dist
+
         
   Deploy:
     needs: Build 
@@ -52,7 +55,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v8
         with:
-          name: build-artifacts
+          name: test-reports
       - name: output build artifacts
         run: ls -la 
       - name: Deploy to production
