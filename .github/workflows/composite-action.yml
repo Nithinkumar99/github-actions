@@ -1,0 +1,69 @@
+name: Demo Project
+on: 
+  push:
+    branches: 
+    - master
+  pull_request:
+    branches: 
+    - master
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v3
+        with: 
+             path: node_modules
+             key: node-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true' # Only run npm ci if the cache was not hit
+        run: npm ci
+      - name: run linter
+        run: npm run lint
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: cache node modules
+        uses: ./.github/actions/cached-dependency # Use the composite action defined in .github/actions/cached-dependency/action.yml to cache dependencies and install them if the cache is not hit
+      - name: Run tests
+        continue-on-error: true # Allow the workflow to continue even if tests fail
+        id: test-step
+        run: npm run test 
+      - name: Upload test reports
+        uses: actions/upload-artifact@v7
+        with:
+            name: test-reports
+            path: test.json
+  Build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: cache node modules
+        uses: ./.github/actions/cached-dependency # Use the composite action defined in .github/actions/cached-dependency/action.yml to cache dependencies and install them if the cache is not hit
+      - name: Build project
+        run: npm run build
+
+        
+  Deploy:
+    needs: Build 
+    uses: ./.github/workflows/reusable.yml # Call the reusable workflow defined in .github/workflows/reusable.yml
+    with:
+       artifact-file: test-reports # Provide the required input for the reusable workflow
+  
+  Report:
+    needs: [lint, Deploy]
+    if: failure() # Only run this job if either lint or Deploy fails
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate report
+        run: |
+          echo "Generating report..."
+          echo " ${{ toJSON(github) }}"
